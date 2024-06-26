@@ -9,4 +9,7 @@ if [ ! -d builddir ]; then
 fi
 meson install -C builddir
 
-./packaged/bin/render
+./packaged/bin/testy
+
+export DRI_PRIME=1
+prime-run ./packaged/bin/testy
