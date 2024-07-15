@@ -1,10 +1,12 @@
 #pragma once
 
+#include <glm/ext.hpp>
+#include <glm/glm.hpp>
 #include <optional>
 #include <string>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
+
 #include "buffers.hh"
+#include "engine/glfw.hh"
 #include "util/misc.hh"
 
 std::string shared_header_shader_text = R"foo(
@@ -67,7 +69,7 @@ struct shared_uniforms {
         inputs(ubo.data.front())
     {
         int interval = 1;
-        glfwSwapInterval(interval);
+        //glfwSwapInterval(interval);
         const GLFWvidmode *vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         inputs.framerate = vidmode->refreshRate / interval;
         glfwSetTime(0);
@@ -107,7 +109,6 @@ struct shared_uniforms {
     }
 };
 
-static glfw_t glfw;
 static shared_uniforms shared{glfw};
 
 GLuint create_program(GLenum type, std::string shader_text) {

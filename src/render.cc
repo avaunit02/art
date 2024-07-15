@@ -2,6 +2,7 @@
 
 #include "engine/glfw.hh"
 #include "engine/render-to-file.hh"
+#include "engine/webgpu.hh"
 #include "scenes/brain.hh"
 #include "scenes/disintegrate.hh"
 #include "scenes/grid-3d.hh"
@@ -15,6 +16,13 @@
 #include "scenes/wanikani-subject-grid.hh"
 
 int main() {
+    {
+        webgpu_t webgpu{};
+        while (!glfwWindowShouldClose(glfw.window)) {
+            webgpu.draw();
+            glfwPollEvents();
+        }
+    }
     {
         //brain scene{};
         //noise_flow_particles scene{};

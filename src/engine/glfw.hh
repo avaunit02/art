@@ -25,29 +25,35 @@ struct glfw_t {
         if (!glfwInit()) {
             throw std::runtime_error("glfw error: failed to initialise");
         }
+        /*
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        */
+        // for webgpu only
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        window = glfwCreateWindow(mode->width, mode->height, "project", monitor, NULL);
+        (void)mode;
+        window = glfwCreateWindow(640, 480, "project", nullptr, nullptr);
 
         if (!window) {
             glfwTerminate();
             throw std::runtime_error("glfw error: failed to create window");
         }
-        glfwMakeContextCurrent(window);
+        //glfwMakeContextCurrent(window);
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetKeyCallback(window, key_callback);
 
-        gl_setup_errors();
+        //gl_setup_errors();
     }
 
     void draw(){
-        glfwSwapBuffers(window);
+        //glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
@@ -58,3 +64,5 @@ struct glfw_t {
         glfwTerminate();
     }
 };
+
+static glfw_t glfw;

@@ -1,3 +1,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = git@github.com:microsoft/vcpkg
+[submodule "glfw3webgpu"]
+	path = glfw3webgpu
+	url = https://github.com/eliemichel/glfw3webgpu

@@ -36,10 +36,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(webgpu)
 
+#add_subdirectory deps
+#FIXME when glfw is installed via vcpkg / system package (maybe?) glfw3webgpu doesn't have the glfw macro
+set(GLFW_BUILD_X11 TRUE)
+add_subdirectory(glfw3webgpu)
+
 add_executable(render src/render.cc)
 set_target_properties(render PROPERTIES CMAKE_CXX_EXTENSIONS FALSE)
 target_compile_options(render PRIVATE -Werror)
 target_include_directories(render PRIVATE src)
-target_link_libraries(render PRIVATE llnl-units::units OpenGL::OpenGL glfw glm::glm Freetype::Freetype assimp::assimp range-v3 nlohmann_json pugixml std::mdspan libassert::assert webgpu)
+target_link_libraries(render PRIVATE llnl-units::units OpenGL::OpenGL glfw glm::glm Freetype::Freetype assimp::assimp range-v3 nlohmann_json pugixml std::mdspan libassert::assert webgpu glfw3webgpu)
 install(TARGETS render)
 target_copy_webgpu_binaries(render)
