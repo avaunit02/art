@@ -7,9 +7,9 @@
 #include "glfw3webgpu.h"
 
 struct webgpu_t {
-    wgpu::Device device = {};
-    wgpu::Queue queue = {};
-    wgpu::Surface surface = {};
+    wgpu::Device device;
+    wgpu::Queue queue;
+    wgpu::Surface surface;
     std::unique_ptr<wgpu::ErrorCallback> error_callback;
     webgpu_t() {
         wgpu::InstanceDescriptor desc = {};
@@ -18,10 +18,11 @@ struct webgpu_t {
             throw std::runtime_error("webgpu error: failed to initialise");
         }
         wgpu::RequestAdapterOptions adapter_options = {};
-        wgpu::Adapter adapter = instance.requestAdapter(adapter_options);
+        wgpu::Adapter adapter{instance.requestAdapter(adapter_options)};
 
         wgpu::DeviceDescriptor device_descriptor = {};
-        device = adapter.requestDevice(device_descriptor);
+        device = {adapter.requestDevice(device_descriptor)};
+        ASSERT(device);
 
         error_callback = device.setUncapturedErrorCallback([](wgpu::ErrorType type, char const* message) {
             std::cout << "webgpu uncaptured device error: type " << type;
@@ -33,7 +34,7 @@ struct webgpu_t {
 
         queue = device.getQueue();
 
-        surface = glfwGetWGPUSurface(instance, glfw.window);
+        surface = {glfwGetWGPUSurface(instance, glfw.window)};
         if (!surface) {
             throw std::runtime_error("webgpu x glfw error: glfwGetWGPUSurface failed");
         }
@@ -51,9 +52,17 @@ struct webgpu_t {
         surface_config.presentMode = wgpu::PresentMode::Fifo;
         surface_config.alphaMode = wgpu::CompositeAlphaMode::Auto;
         surface.configure(surface_config);
+
+        adapter.release();
+        instance.release();
+    }
+    ~webgpu_t() {
+        surface.release();
+        queue.release();
+        device.release();
     }
     void draw() {
-        wgpu::TextureView texture_view = {};
+        wgpu::TextureView texture_view{};
         {
             wgpu::SurfaceTexture surface_texture;
             surface.getCurrentTexture(&surface_texture);
@@ -70,7 +79,7 @@ struct webgpu_t {
             texture_view_descriptor.baseArrayLayer = 0;
             texture_view_descriptor.arrayLayerCount = 1;
             texture_view_descriptor.aspect = wgpu::TextureAspect::All;
-            texture_view = texture.createView(texture_view_descriptor);
+            texture_view = {texture.createView(texture_view_descriptor)};
         }
 
         wgpu::RenderPassColorAttachment renderpass_color_attachment = {};
@@ -86,14 +95,25 @@ struct webgpu_t {
         renderpass_descriptor.colorAttachments = &renderpass_color_attachment;
 
         wgpu::CommandEncoderDescriptor command_encoder_descriptor = {};
-        wgpu::CommandEncoder command_encoder = device.createCommandEncoder(command_encoder_descriptor);
+        wgpu::CommandEncoder command_encoder = {device.createCommandEncoder(command_encoder_descriptor)};
         wgpu::RenderPassEncoder renderpass = command_encoder.beginRenderPass(renderpass_descriptor);
+        //TODO pass in pipeline from the scenes?
+        //and some parameters to draw
+        //renderpass.setPipeline(pipeline);
+        //renderpass.draw(...);
+        {
+            wgpu::VertexBufferLayout vertex_buffer_layout();
+            vertex_buffer_layout.render_pipeline_descriptor.vertex.buffers = &buffer;
+            render_pipeline_descriptor.vertex.bufferCount = 1;
+            wgpu::RenderPipeline render_pipeline = device.createRenderPipeline(render_pipeline_descriptor);
+            (void)render_pipeline;
+        }
         renderpass.end();
 
         wgpu::CommandBufferDescriptor command_buffer_descriptor = {};
-        const std::vector<WGPUCommandBuffer> command_buffers = {command_encoder.finish(command_buffer_descriptor)};
+        wgpu::CommandBuffer command_buffer = {command_encoder.finish(command_buffer_descriptor)};
 
-        queue.submit(command_buffers);
+        queue.submit(command_buffer);
 
         surface.present();
 
@@ -102,5 +122,10 @@ struct webgpu_t {
 #elif defined(WEBGPU_BACKEND_WGPU)
         device.poll(false);
 #endif
+
+        command_buffer.release();
+        renderpass.release();
+        command_encoder.release();
+        texture_view.release();
     }
 };

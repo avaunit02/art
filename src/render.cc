@@ -2,6 +2,7 @@
 
 #include "engine/glfw.hh"
 #include "engine/render-to-file.hh"
+#include "engine/webgpu-buffers.hh"
 #include "engine/webgpu.hh"
 #include "scenes/brain.hh"
 #include "scenes/disintegrate.hh"
@@ -20,12 +21,12 @@ int main() {
         webgpu_t webgpu{};
         while (!glfwWindowShouldClose(glfw.window)) {
             webgpu.draw();
-            glfwPollEvents();
+            glfw.draw();
         }
     }
     {
         //brain scene{};
-        //noise_flow_particles scene{};
+        noise_flow_particles scene{};
         //wanikani_subject_grid scene{};
         //wanikani_review_time_grid scene{};
         //grid_bezier scene{};
@@ -33,7 +34,7 @@ int main() {
         //vsync_test scene{};
         //icosphere scene{};
         //grid_3d scene{};
-        orbiter scene{};
+        //orbiter scene{};
 
         //render_to_file rtf("test.mp4");
 
