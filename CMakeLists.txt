@@ -12,6 +12,7 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-document
 
 #system deps
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
+find_package(Vulkan REQUIRED)
 
 #vcpkg deps
 find_package(llnl-units CONFIG REQUIRED)
@@ -25,9 +26,21 @@ find_package(pugixml CONFIG REQUIRED)
 find_package(mdspan CONFIG REQUIRED)
 find_package(libassert CONFIG REQUIRED)
 
+#fetchcontent deps
+include(FetchContent)
+FetchContent_Declare(
+  avk
+  # patched to build with clang, until https://github.com/cg-tuwien/Auto-Vk/pull/97 is merged
+  # GIT_REPOSITORY https://github.com/cg-tuwien/Auto-Vk
+  # GIT_TAG v0.98.1
+  GIT_REPOSITORY https://github.com/avagordon01/Auto-Vk
+  GIT_TAG fix-clang-build
+)
+FetchContent_MakeAvailable(avk)
+
 add_executable(render src/render.cc)
 set_target_properties(render PROPERTIES CMAKE_CXX_EXTENSIONS FALSE)
-target_compile_options(render PRIVATE -Werror)
+#target_compile_options(render PRIVATE -Werror)
 target_include_directories(render PRIVATE src)
-target_link_libraries(render PRIVATE llnl-units::units OpenGL::OpenGL glfw glm::glm Freetype::Freetype assimp::assimp range-v3 nlohmann_json pugixml std::mdspan libassert::assert)
+target_link_libraries(render PRIVATE llnl-units::units OpenGL::OpenGL glfw glm::glm Freetype::Freetype assimp::assimp range-v3 nlohmann_json pugixml std::mdspan libassert::assert Vulkan::Vulkan avk)
 install(TARGETS render)
